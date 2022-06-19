@@ -1,4 +1,4 @@
-# Godot-Procedural-Image-Editor
+# Godot-Procedural-Image-Editor (GdPIE)
 Program for procedurally editing batches of images. Made in Godot.
 
 ## Using GdPIE
@@ -10,7 +10,7 @@ Program for procedurally editing batches of images. Made in Godot.
 
 
 ## Example procedures
-### You must use the `save_png` or `save_exr` command somewhere in your procedure, or the processed images will not save
+#### You must use the `save_png` or `save_exr` command somewhere in your procedure, or the processed images will not save
 
 default.procedure:
 ```
