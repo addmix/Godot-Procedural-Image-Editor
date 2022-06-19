@@ -29,43 +29,81 @@ func main(args : Array) -> void:
 	
 	#check that all folders are present, if not, make new folder
 	var dir := Directory.new()
+	
+	var import_path_supplied : bool = args.has("-i")
+	
+	if import_path_supplied:
+		var path_index : int = args.find("-i") + 1
+		if args.size() >= path_index:
+			import_path = args[path_index]
+	
 	var import_folder_exists : bool = dir.dir_exists(import_path)
 	if !import_folder_exists:
 		var err : int = dir.make_dir(import_path)
 		if err != OK:
 			push_error("Error %s when making import folder." % err)
+	
+	var export_path_supplied : bool = args.has("-e")
+	
+	if export_path_supplied:
+		var path_index : int = args.find("-e") + 1
+		if args.size() >= path_index:
+			export_path = args[path_index]
+	
 	var export_folder_exists : bool = dir.dir_exists(export_path)
 	if !export_folder_exists:
 		var err : int = dir.make_dir(export_path)
 		if err != OK:
 			push_error("Error %s when making export folder." % err)
+	
+	var procedure_path_supplied : bool = args.has("-p")
+	
 	var procedure_folder_exists : bool = dir.dir_exists(procedure_path)
 	if !procedure_folder_exists:
 		var err : int = dir.make_dir(procedure_path)
 		if err != OK:
 			push_error("Error %s when making procedures folder" % err)
+	
+	var asset_path_supplied : bool = args.has("-a")
+	if export_path_supplied:
+		var path_index : int = args.find("-a") + 1
+		if args.size() >= path_index:
+			export_path = args[path_index]
+	
+	if !export_folder_exists:
+		var err : int = dir.make_dir(export_path)
+		if err != OK:
+			push_error("Error %s when making export folder." % err)
+	
 	var asset_folder_exists : bool = dir.dir_exists(asset_path)
 	if !asset_folder_exists:
 		var err : int = dir.make_dir(asset_path)
 		if err != OK:
 			push_error("Error %s when making assets folder" % err)
 	
+	
 	#load procedure
 	var contents : String = ""
-	if args.has("-p"):
+	if procedure_path_supplied:
 		var path_index : int = args.find("-p") + 1
 		if args.size() >= path_index:
 			contents = load_procedure(args[path_index])
 	#no procedure specified, use default.procedure
 	else:
+		#check that default procedure exists
+		var file := File.new()
+		if !file.file_exists(procedure_path + "default.procedure"):
+			create_default_procedure()
 		contents = load_procedure(procedure_path + "default.procedure")
+	
 	
 	var procedure_steps : Array = []
 	#format procedure
 	var lines : PoolStringArray = contents.split("\n", false)
 	#load commands into array
 	for line in lines:
-		procedure_steps.append(line.split(" ", false))
+		var comment : Array = line.split("#", false, 1)
+		procedure_steps.append(comment[0].split(" ", false))
 	
 	#load assets
 	var assets := get_contents(asset_path)
@@ -154,14 +192,14 @@ func interpreter(image : Image, args : Array, path : String) -> Image:
 			if args.size() < 3:
 				incorrect_number_args_error(args)
 			image.resize_to_po2(bool(args[1]), int(args[2]))
-		"shrink_x2":
-			image.shrink_x2()
 		"save_exr":
 			if args.size() < 2:
 				incorrect_number_args_error(args)
 			image.save_exr(path, bool(args[1]))
 		"save_png":
 			image.save_png(path)
+		"shrink_x2":
+			image.shrink_x2()
 		var cmd:
 			push_error("Unsupported command %s" % cmd)
 	
@@ -172,3 +210,10 @@ func blend_image(image : Image, args : Array) -> Image:
 
 func incorrect_number_args_error(args : Array) -> void:
 	push_error("Incorrect number of arguments at %s" % args)
+
+func create_default_procedure() -> void:
+	var file = File.new()
+	
+	file.open(procedure_path + "default.procedure", File.WRITE)
+	file.store_line("crop 10 10 10 10 #crops 10 pixels from the left, top, right, and bottom respectively")
+	file.store_line("save_png #saves image")
