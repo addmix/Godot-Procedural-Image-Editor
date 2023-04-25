@@ -112,12 +112,14 @@ func main(args : Array) -> void:
 	#load images (one at a time)
 	var images := get_contents(import_path)
 	for path in images:
+		#get name of file without any overlapping filetypes
+		var base_path : String = path.left(path.find("."))
 		var image : Image = Image.new()
 		image.load(import_path + path)
 		
 		#process image through procedure steps
 		for step in procedure_steps:
-			image = interpreter(image, step, export_path + path)
+			image = interpreter(image, step, export_path + base_path)
 
 #returns list of contents of a folder
 func get_contents(path : String) -> PoolStringArray:
@@ -198,6 +200,8 @@ func interpreter(image : Image, args : Array, path : String) -> Image:
 			image.save_exr(path, bool(args[1]))
 		"save_png":
 			image.save_png(path)
+		"save_png_as_gif":
+			image.save_png(path + ".gif")
 		"shrink_x2":
 			image.shrink_x2()
 		var cmd:
