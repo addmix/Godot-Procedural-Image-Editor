@@ -2,12 +2,12 @@ extends Node
 
 #How this program works:
 
-#1. Have images you wish to edit in import folder
-#2. Have 'gcode' like file that edits all pictures
-#2.1. Allow usage of asset files (watermarks, effects) to be used, stored in assets folder
-#3. Run program through exe, or if more options are desired, through batch file
-#3.1 If program is run through the exe, gcode-like file named "default" will be used
-#4. processed images will be output with the same name, suffixed with _edited, in an export folder
+#1. Place images you wish to edit in import folder.
+#2. Create a procedure file that edits all pictures.
+#2.1. Allow usage of asset files (watermarks, effects) to be used, stored in assets folder.
+#3. Run program directly, or through the command line if more options are desired.
+#3.1 If program is run directly, procedure file named "default.gdpie" will be used
+#4. processed images will be output with the same name, in an export folder
 
 onready var exe_path : String = OS.get_executable_path().get_base_dir()
 onready var import_path : String = exe_path + "/import/"
@@ -92,9 +92,9 @@ func main(args : Array) -> void:
 	else:
 		#check that default procedure exists
 		var file := File.new()
-		if !file.file_exists(procedure_path + "default.procedure"):
+		if !file.file_exists(procedure_path + "default.gdpie"):
 			create_default_procedure()
-		contents = load_procedure(procedure_path + "default.procedure")
+		contents = load_procedure(procedure_path + "default.gdpie")
 	
 	
 	var procedure_steps : Array = []
@@ -218,6 +218,6 @@ func incorrect_number_args_error(args : Array) -> void:
 func create_default_procedure() -> void:
 	var file = File.new()
 	
-	file.open(procedure_path + "default.procedure", File.WRITE)
+	file.open(procedure_path + "default.gdpie", File.WRITE)
 	file.store_line("crop 10 10 10 10 #crops 10 pixels from the left, top, right, and bottom respectively")
 	file.store_line("save_png #saves image")
